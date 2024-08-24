@@ -3,19 +3,22 @@
 PowerShell script to generate ShellCode in various formats
 
 ```
-ShellGen -x64 -CmdCommand "echo ciao > C:\Users\Rob_Commando\Desktop\ciao.txt" -OutputFormat "Raw" -OutputFilePath C:\Users\Senna\Desktop\whoami.bin
+ShellGen -x64 -Command "cmd /k ipconfig" -OutputFormat "Encrypted"
 ```
 ```
-ShellGen -x64 -PwshCommand "echo ciao > C:\Users\Rob_Commando\Desktop\ciao.txt" -OutputFormat "Raw" -OutputFilePath C:\Users\Senna\Desktop\whoami.bin
+ShellGen -x64 -CmdCommand "ipconfig" -OutputFormat "Raw" -OutputFilePath C:\Users\Senna\Desktop\whoami.bin
 ```
 ```
-ShellGen -x64 -B64PwshCommand "JABwA...AKAApAA==" -OutputFilePath C:\Users\Senna\Desktop\whoami.bin
+ShellGen -x64 -PwshCommand "ipconfig" -OutputFormat "csharp"
+```
+```
+ShellGen -x64 -B64PwshCommand "JABwA...AKAApAA==" -OutputFormat "Encrypted"
 ```
 
 ### Output Formats
 
 ```
-Raw, ps1, Hex, C, vba, csharp
+Raw, ps1, Hex, C, vba, csharp, Encrypted
 ```
 
 ### Architecture

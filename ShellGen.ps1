@@ -23,19 +23,19 @@ function ShellGen {
     
     if($PwshCommand){
         $EncCmd = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($PwshCommand))
-        $ShCommand = "powershell.exe -ep bypass -Window Hidden -enc $EncCmd"
+        $ShCommand = "powershell.exe -NoLogo -NonInteractive -ep bypass -enc $($EncCmd)"
     }
     
     elseif($B64PwshCommand){
-        $ShCommand = "powershell.exe -ep bypass -Window Hidden -enc $B64PwshCommand"
+        $ShCommand = "powershell.exe -NoLogo -NonInteractive -ep bypass -enc $($B64PwshCommand)"
     }
     
     elseif($CmdCommand){
-        $ShCommand = "cmd /c $CmdCommand"
+        $ShCommand = "cmd /c $($CmdCommand)"
     }
 
     elseif($Command){
-        $ShCommand = "$Command"
+        $ShCommand = $Command
     }
     
     if($x64){

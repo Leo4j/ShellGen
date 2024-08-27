@@ -181,7 +181,7 @@ function ShellGen {
 	$payloadSize = $shellcode.Length
     
     switch ($OutputFormat) {
-        "Encrypt" {
+        "Encrypted" {
             $keyString = -join ((65..90) + (97..122) | Get-Random -Count 16 | % {[char]$_})
 			$keyBytes = [System.Text.Encoding]::UTF8.GetBytes($keyString)
 			$encryptedData = AESEncrypt -plainText $shellcode -Key $keyBytes

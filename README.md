@@ -3,6 +3,9 @@
 PowerShell script to generate ShellCode in various formats
 
 ```
+iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/Leo4j/ShellGen/main/ShellGen.ps1')
+```
+```
 ShellGen -x64 -Command "cmd /k ipconfig" -OutputFormat "Encrypted"
 ```
 ```

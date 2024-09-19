@@ -29,3 +29,9 @@ Raw, ps1, Hex, C, vba, csharp, Encrypted
 ```
 x64, x86
 ```
+
+### Feed a raw shellcode file
+
+```
+Shellgen -RawFile "C:\Users\User\Desktop\file.bin" -OutputFormat vba
+```

@@ -247,19 +247,64 @@ function ShellGen {
 			Write-Output ""
         }
         "vba" {
-            $vbaContent = "buf = Array($($shellcode -join ','))"
-            if ($OutputFilePath) {
-                Set-Content -Path $OutputFilePath -Value $vbaContent
-                $finalSize = (Get-Item $OutputFilePath).length
-                Write-Output "Payload size: $payloadSize bytes"
-                Write-Output "Final size of vbapplication file: $finalSize bytes"
-                Write-Output "[*] Payload saved to $OutputFilePath"
-            } else {
-                Write-Output "Payload size: $payloadSize bytes"
-                Write-Output $vbaContent
-            }
-            Write-Output ""
-        }
+		$chunkSize = 100
+		$shellcodeChunks = @()
+
+		# Initialize the first chunk to avoid repetition
+		$vbaContent = "buf = Array(" + ($shellcode[0..([Math]::Min($chunkSize - 1, $shellcode.Length - 1))] -join ',') + ")" + "`n"
+
+		# Loop through the rest of the shellcode starting from the second chunk
+		for ($i = $chunkSize; $i -lt $shellcode.Length; $i += $chunkSize) {
+			$chunk = $shellcode[$i..([Math]::Min($i + $chunkSize - 1, $shellcode.Length - 1))]
+			$shellcodeChunks += "buf = Concatenate(buf, Array(" + ($chunk -join ',') + "))"
+		}
+
+		# Combine all chunks into VBA content
+		$vbaContent += ($shellcodeChunks -join "`n")
+
+		# Output or save to file
+		if ($OutputFilePath) {
+			Set-Content -Path $OutputFilePath -Value $vbaContent
+			$finalSize = (Get-Item $OutputFilePath).length
+			Write-Output ""
+			Write-Output "Payload size: $payloadSize bytes"
+			Write-Output ""
+			Write-Output "Final size of vbapplication file: $finalSize bytes"
+			Write-Output "[*] Payload saved to $OutputFilePath"
+		} else {
+			Write-Output ""
+			Write-Output "Payload size: $payloadSize bytes"
+			Write-Output ""
+			Write-Output $vbaContent
+		}
+		Write-Output ""
+		Write-Output "!! Add the following function to your VBA script !!"
+		Write-Output ""
+		Write-Output @'
+Function Concatenate(arr1 As Variant, arr2 As Variant) As Variant
+    Dim result() As Variant
+    Dim i As Long, j As Long, k As Long
+
+    ' Resize the result array to fit both arrays
+    ReDim result(LBound(arr1) To UBound(arr1) + UBound(arr2) - LBound(arr2) + 1)
+
+    ' Copy first array to result
+    For i = LBound(arr1) To UBound(arr1)
+        result(i) = arr1(i)
+    Next i
+
+    ' Copy second array to result
+    k = i ' Start index for the second array in the result
+    For j = LBound(arr2) To UBound(arr2)
+        result(k) = arr2(j)
+        k = k + 1
+    Next j
+
+    Concatenate = result
+End Function
+'@
+		Write-Output ""
+	}
         "csharp" {
             $formattedShellcode = $shellcode | ForEach-Object { '0x' + $_.ToString('X2') }
             $lines = @()

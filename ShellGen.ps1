@@ -339,6 +339,19 @@ End Function
             }
             Write-Output ""
         }
+	"UUID" {
+            $UUIDContent = Convert-UUID -bin $shellcode
+			
+            if ($OutputFilePath) {
+                Set-Content -Path $OutputFilePath -Value $UUIDContent
+                $finalSize = (Get-Item $OutputFilePath).length
+                Write-Output "Final size of csharp file: $finalSize bytes"
+                Write-Output "[*] Payload saved to $OutputFilePath"
+            }
+            else {
+                Write-Output $UUIDContent
+            }
+	}
     }
 }
 
@@ -446,4 +459,45 @@ function Format-ByteArray {
 
     $formattedBytes = $byteArray | ForEach-Object { "0x{0:x2}" -f $_ }
     return ($formattedBytes -join ", ")
+}
+
+function Convert-UUID {
+    param (
+        [Parameter(Mandatory = $true)]
+        [byte[]]$bin
+    )
+
+    $offset = 0
+    $output = ""
+
+    Write-Host "Payload size: $($bin.Length) bytes"
+
+    while ($offset -lt $bin.Length) {
+        $countOfBytesToConvert = $bin.Length - $offset
+        if ($countOfBytesToConvert -lt 16) {
+            # Add padding with 0x90 if there are less than 16 bytes
+            $ZerosToAdd = 16 - $countOfBytesToConvert
+            $padding = @(0x90) * $ZerosToAdd
+            $byteArray = $bin[$offset..($bin.Length - 1)] + $padding
+        } else {
+            # Get the next 16 bytes
+            $byteArray = $bin[$offset..($offset + 15)]
+        }
+
+        # Convert the byte array to little-endian order as per UUID(bytes_le=chunk)
+        # Extract fields from the byte array
+        $Data1 = [BitConverter]::ToInt32($byteArray, 0)        # bytes 0-3
+        $Data2 = [BitConverter]::ToInt16($byteArray, 4)        # bytes 4-5
+        $Data3 = [BitConverter]::ToInt16($byteArray, 6)        # bytes 6-7
+        $Data4 = $byteArray[8..15]                             # bytes 8-15
+
+        # Create the GUID using the extracted fields
+        $uuid = New-Object System.Guid ($Data1, $Data2, $Data3, $Data4)
+
+        $offset += 16
+
+        # Store the UUID in the output
+        $output += "`"$uuid`",`n"
+    }
+    $output
 }

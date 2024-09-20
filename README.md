@@ -21,7 +21,7 @@ ShellGen -x64 -B64PwshCommand "JABwA...AKAApAA==" -OutputFormat "Encrypted"
 ### Output Formats
 
 ```
-Raw, ps1, Hex, C, vba, csharp, Encrypted
+Raw, ps1, Hex, C, vba, csharp, Encrypted, UUID
 ```
 
 ### Architecture

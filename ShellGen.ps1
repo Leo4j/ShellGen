@@ -10,14 +10,10 @@ function ShellGen {
     #>
 
     param (
-        [string]$PwshCommand,
-        [string]$B64PwshCommand,
-        [string]$CmdCommand,
         [string]$Command,
 	[string]$RawFile,
         [switch]$x64,
         [switch]$x86,
-        [switch]$Encrypt,
         [string]$OutputFilePath,
         [string]$OutputFormat = "Raw"
     )
@@ -33,22 +29,7 @@ function ShellGen {
         }
     }
     else{
-	    if($PwshCommand){
-	        $EncCmd = [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($PwshCommand))
-	        $ShCommand = "powershell.exe -NoLogo -NonInteractive -ep bypass -enc $($EncCmd)"
-	    }
-	    
-	    elseif($B64PwshCommand){
-	        $ShCommand = "powershell.exe -NoLogo -NonInteractive -ep bypass -enc $($B64PwshCommand)"
-	    }
-	    
-	    elseif($CmdCommand){
-	        $ShCommand = "cmd /c $($CmdCommand)"
-	    }
-	
-	    elseif($Command){
-	        $ShCommand = $Command
-	    }
+	    $ShCommand = $Command
 	    
 	    if($x64){
 	        # WinExec x64 PI Null Free
@@ -204,7 +185,7 @@ function ShellGen {
 			Write-Output "payload[] = {$formattedOutput}"
 			Write-Output ""
         }
-		"Raw" {
+	"Raw" {
             if (-not $OutputFilePath) {
                 $OutputFilePath = ".\payload.raw"
             }

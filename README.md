@@ -9,13 +9,7 @@ iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/
 ShellGen -x64 -Command "cmd /k ipconfig" -OutputFormat "Encrypted"
 ```
 ```
-ShellGen -x64 -CmdCommand "ipconfig" -OutputFormat "Raw" -OutputFilePath C:\Users\Senna\Desktop\whoami.bin
-```
-```
-ShellGen -x64 -PwshCommand "ipconfig" -OutputFormat "csharp"
-```
-```
-ShellGen -x64 -B64PwshCommand "JABwA...AKAApAA==" -OutputFormat "Encrypted"
+ShellGen -x64 -Command "cmd /k ipconfig" -OutputFormat "Raw" -OutputFilePath C:\Users\Senna\Desktop\whoami.bin
 ```
 
 ### Output Formats
